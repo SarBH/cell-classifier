@@ -30,7 +30,7 @@ def load_data(dir, max_examples, resize_height, resize_width, label, m_idx):
         # assert(img[:,:,0].all() == img[:,:,1].all() == img[:,:,2].all()) # assert image is grayscale and removing dimension wont affect training
         # img = img[:,:,0] # remove the RGB color dimension (no new data)
         assert(data[m_idx,:,:,:].shape == img.shape) # asserts image matrix is of the intended shape, and fits data matrix
-        data[m_idx,:,:,:] = img.transpose() #add the array to data
+        data[m_idx,:,:,:] = img #add the array to data
         labels.append(label)
         m_idx = m_idx + 1
     
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     y_train = encode_labels(labels, 'viable', 'unviable')
     x_train = standardize_data(data)
 
-    # np.save("/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/x_train_2000.npy", x_train)
+    np.save("/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/x_train_2000.npy", x_train)
 
     train_model(x_train, y_train)
 
