@@ -136,10 +136,11 @@ if __name__ == "__main__":
         np.save("/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/y_train_4000.npy", y_train)
 
     elif sys.argv[1] == 'load_examples':
-        x_train = np.load("/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/x_train_2000.npy")
-        y_train = np.load("/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/y_train_2000.npy")
+        x_train = np.load("/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/x_train_4000.npy")
+        y_train = np.load("/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/y_train_4000.npy")
+        x_train = x_train[:3968,:,:,:]
+        y_train = y_train[:3968]
 
-
+    x_train, y_train = shuffle_data(x_train, y_train)
     train_model(x_train, y_train, with_validation=True)
 
-    # x_train, y_train = shuffle_data(x_train, y_train)
