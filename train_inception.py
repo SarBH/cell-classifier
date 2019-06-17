@@ -6,6 +6,7 @@ import numpy as np
 from keras import applications
 from keras.models import Model
 from keras.layers import GlobalAveragePooling2D, Dropout, Dense
+from sklearn.model_selection import train_test_split
 import logging, sys
 import random
 import sys
@@ -82,58 +83,63 @@ def train_model(x_train, y_train, with_validation=False):
                                                 input_shape = (300, 300, 3))
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
-    x = Dropout(0.7)(x)
+    x = Dropout(0.1)(x)
     predictions = Dense(2, activation = 'softmax')(x)
     model = Model(inputs = base_model.input, outputs = predictions)
 
     model.compile(loss = "binary_crossentropy", optimizer = "adam", metrics = ["accuracy"])
     
     if with_validation == True:
-        H = model.fit(x_train, y_train, epochs = 22, batch_size = 10, validation_data = (x_test, y_test))
+        H = model.fit(x_train, y_train, epochs = 30, batch_size = 10, validation_data = (x_test, y_test))
     else:
-        H = model.fit(x_train, y_train, epochs = 22, batch_size = 10)
+        H = model.fit(x_train, y_train, epochs = 30, batch_size = 10)
 
     scores = model.evaluate(x_train, y_train, verbose=1)
     print("the model scores are:", scores)
     print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
-    model.save("/home/nyscf/Documents/sarita/clas/test_colony_inception_mb10_m2000_e22.h5")
+    model.save("/home/nyscf/Documents/sarita/clas/test_colony_inception_mb10_m4000_e30_do1.h5")
 
 
 if __name__ == "__main__":
-    curr_m_idx = 0
-    data = np.empty((2000, 300, 300, 3), dtype=np.uint8)
-    print(sys.getsizeof(data))
-    labels = []
+    if len(sys.argv) == 1:
+        curr_m_idx = 0
+        data = np.empty((4000, 300, 300, 3), dtype=np.uint8)
+        print(sys.getsizeof(data))
+        labels = []
 
-    data, labels, m_idx = load_data('/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/Colonies_Viable/Original', 500, 300, 300, 'viable', curr_m_idx)
-    curr_m_idx = m_idx
-    data, labels, m_idx = load_data('/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/Colonies_Viable/rotate_90', 500, 300, 300, 'viable',curr_m_idx)
-    curr_m_idx = m_idx
-    # data, labels, m_idx = load_data('/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/Colonies_Viable/rotate_180', 500, 500, 500, 'viable',curr_m_idx)
-    # curr_m_idx = m_idx
-    # data, labels, m_idx = load_data('/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/Colonies_Viable/rotate_270', 500, 500, 500, 'viable',curr_m_idx)
-    # curr_m_idx = m_idx
-    # print("data has this many bytes: ", sys.getsizeof(data))
-    # print(len(data))
+        data, labels, m_idx = load_data('/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/Colonies_Viable/Original', 500, 300, 300, 'viable', curr_m_idx)
+        curr_m_idx = m_idx
+        data, labels, m_idx = load_data('/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/Colonies_Viable/rotate_90', 500, 300, 300, 'viable',curr_m_idx)
+        curr_m_idx = m_idx
+        data, labels, m_idx = load_data('/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/Colonies_Viable/rotate_180', 500, 300, 300, 'viable',curr_m_idx)
+        curr_m_idx = m_idx
+        data, labels, m_idx = load_data('/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/Colonies_Viable/rotate_270', 500, 300, 300, 'viable',curr_m_idx)
+        curr_m_idx = m_idx
+        print("data has this many bytes: ", sys.getsizeof(data))
+        print(len(data))
 
-    data, labels, m_idx = load_data('/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/Diff_And_Bad_Colonies/Original', 500, 300, 300, 'unviable',curr_m_idx)
-    curr_m_idx = m_idx
-    data, labels, m_idx = load_data('/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/Diff_And_Bad_Colonies/rotate_90', 500, 300, 300, 'unviable',curr_m_idx)
-    curr_m_idx = m_idx
-    # data, labels, m_idx = load_data('/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/Diff_And_Bad_Colonies/rotate_180', 500, 500, 500, 'unviable',curr_m_idx)
-    # curr_m_idx = m_idx    
-    # data, labels, m_idx = load_data('/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/Diff_And_Bad_Colonies/rotate_270', 500, 500, 500, 'unviable',curr_m_idx)
-    # print("data has this many bytes: ", sys.getsizeof(data))
-    # print(len(data))
-    
-    # data = np.load("/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/x_train_2000.npy")
+        data, labels, m_idx = load_data('/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/Diff_And_Bad_Colonies/Original', 500, 300, 300, 'unviable',curr_m_idx)
+        curr_m_idx = m_idx
+        data, labels, m_idx = load_data('/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/Diff_And_Bad_Colonies/rotate_90', 500, 300, 300, 'unviable',curr_m_idx)
+        curr_m_idx = m_idx
+        data, labels, m_idx = load_data('/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/Diff_And_Bad_Colonies/rotate_180', 500, 300, 300, 'unviable',curr_m_idx)
+        curr_m_idx = m_idx    
+        data, labels, m_idx = load_data('/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/Diff_And_Bad_Colonies/rotate_270', 500, 300, 300, 'unviable',curr_m_idx)
+        print("data has this many bytes: ", sys.getsizeof(data))
+        print(len(data))
 
-    y_train = encode_labels(labels, 'viable', 'unviable')
-    x_train = standardize_data(data)
+        y_train = encode_labels(labels, 'viable', 'unviable')
+        x_train = standardize_data(data)
 
-    np.save("/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/x_train_2000.npy", x_train)
+        np.save("/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/x_train_4000.npy", x_train)
+        np.save("/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/y_train_4000.npy", y_train)
 
-    train_model(x_train, y_train)
+    elif sys.argv[1] == 'load_examples':
+        x_train = np.load("/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/x_train_2000.npy")
+        y_train = np.load("/home/nyscf/Desktop/Classification_Model/Initial_Training_Set/train/y_train_2000.npy")
+
+
+    train_model(x_train, y_train, with_validation=True)
 
     # x_train, y_train = shuffle_data(x_train, y_train)
