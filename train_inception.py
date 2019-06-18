@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 # from sklearn.preprocessing import OneHotEncoder
 # from sklearn.model_selection import train_test_split
-from keras import applications
+from keras import applications, callbacks
 from keras.models import Model
 from keras.layers import GlobalAveragePooling2D, Dropout, Dense
 from sklearn.model_selection import train_test_split
@@ -37,7 +37,6 @@ def load_data(dir, max_examples, resize_height, resize_width, label, m_idx):
     
     # assert all labels went into the lists
     assert(len(labels) == m_idx)
-
 
     return (data, labels, m_idx)
 
@@ -76,29 +75,48 @@ def shuffle_data(x_train, y_train, seed=1):
 
 
 def train_model(x_train, y_train, with_validation=False):
+    """ Trains a CNN model and saves callbacks into model_path"""
     if with_validation == True:
         x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size = 0.1, random_state = 25)
 
-    base_model = applications.inception_v3.InceptionV3(weights = None, include_top = False,
+    # SET THESE PARAMETERS. 
+    m = str(len(x_train[0]))
+    mb_size = 10
+    num_epochs = 30
+    dropout_rate = 0.3
+    model_type = "inception"
+    # YOUR EDITS END HERE. DO NOT TOUCH ANYTHING BELOW
+
+    if model_type == "inception":
+        base_model = applications.inception_v3.InceptionV3(weights = None, include_top = False,
                                                 input_shape = (300, 300, 3))
+    elif model_type == "resnet":
+        base_model = applications.resnet50.resnet50.ResNet50(input_shape=(300, 300, 3))
+
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
-    x = Dropout(0.1)(x)
+    x = Dropout(dropout_rate)(x)
     predictions = Dense(2, activation = 'softmax')(x)
     model = Model(inputs = base_model.input, outputs = predictions)
 
     model.compile(loss = "binary_crossentropy", optimizer = "adam", metrics = ["accuracy"])
     
+    
     if with_validation == True:
-        H = model.fit(x_train, y_train, epochs = 30, batch_size = 10, validation_data = (x_test, y_test))
+        model_path = "/home/nyscf/Documents/sarita/cell-classifier/chkpt_model.{epoch:02d}-acc{val_acc:.2f}.hdf5"#  _{model_type}_mb{mb_size}_m{m}_do{dropout_rate}   .format(model_type=model_type, mb_size=mb_size, m=m, dropout_rate=dropout_rate)
+        checkpoint = callbacks.ModelCheckpoint(model_path, monitor='val_loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
+        callback_list = [checkpoint]
+        H = model.fit(x_train, y_train, epochs = num_epochs, batch_size = mb_size, validation_data = (x_test, y_test), callbacks=callback_list)
     else:
-        H = model.fit(x_train, y_train, epochs = 30, batch_size = 10)
+        H = model.fit(x_train, y_train, epochs = num_epochs, batch_size = mb_size)
 
     scores = model.evaluate(x_train, y_train, verbose=1)
     print("the model scores are:", scores)
     print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
-    model.save("/home/nyscf/Documents/sarita/clas/test_colony_inception_mb10_m4000_e30_do1.h5")
+    model.save("/home/nyscf/Documents/sarita/cell-classifier/model_resnet_mb10_m3500_e22_do2.h5")
+    model.save("/home/nyscf/Documents/sarita/cell-classifier/model_{model_type}_mb{mb_size}_m{m}_e{num_epochs}_do{dropout_rate}.h5".format(model_type=model_type, mb_size=mb_size, m=m, num_epochs=num_epochs, dropout_rate=dropout_rate))
+
 
 
 if __name__ == "__main__":
