@@ -1,0 +1,29 @@
+<script src="https://api.labelbox.com/static/labeling-api.js"></script>
+<div id="form"></div>
+<script>
+function label(label){
+  Labelbox.setLabelForAsset(label).then(() => {
+    Labelbox.fetchNextAssetToLabel();
+  });
+}
+
+Labelbox.currentAsset().subscribe((asset) => {
+  if (asset){
+    drawItem(asset.data);
+  }
+})
+function drawItem(dataToLabel){
+  const labelForm = `
+    <img src="${dataToLabel}" style="width: 1000px;"></img>
+    <div style="display: flex;">
+      <button onclick="label('excellent')">Excellent</button>
+      <button onclick="label('viable')">Viable</button>
+      <button onclick="label('diff')">Differentiated</button>
+      <button onclick="label('debris')">Debris</button>
+      <button onclick="label('dead')">Dead</button>
+    </div>
+  `;
+  document.querySelector('#form').innerHTML = labelForm;
+}
+
+</script>
