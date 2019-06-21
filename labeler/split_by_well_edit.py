@@ -60,36 +60,3 @@ for run_folder in os.listdir(runs_dir):
 
 
 
-
-
-
-
-"""
-            # subprocess.call(["xdg-open", os.path.join(runs_dir, run_folder, plate_date_folder, image_name)])
-
-            todo = input("what now?")
-            if todo == "prev":
-                date_seek = date_taken - timedelta(days=3)
-                date_seek = date_seek.strftime("%m-%d-%Y")
-                print(date_seek)
-                well_seek = ["find ", os.path.join(runs_dir, run_folder), " | grep ", run_id, " | grep ", plate_id, " | grep ", well_id, " | grep ", date_seek]
-                P = ''.join(well_seek)
-                images_of_well = subprocess.call(P, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, shell=True)
-                if images_of_well == 1:
-                    date_seek = date_taken - timedelta(days=4)
-                    date_seek = date_seek.strftime("%m-%d-%Y")
-                    well_seek = ["find ", os.path.join(runs_dir, run_folder), " | grep ", run_id, " | grep ", plate_id, " | grep ", well_id, " | grep ", date_seek]
-                    P = ''.join(well_seek)
-                    images_of_well = subprocess.call(P, shel
-                # try:
-                #     images_of_well = subprocess.(P, shell=
-                # except subprocess.CalledProcessError as e:            print(images_of_well)
-
-                #     raise RuntimeError("command '{}' return with error (code {}) {}:".format(e.cmd, e.returncode, e.output))
-            # print("find", os.path.join(runs_dir, run_folder), "| grep", run_id, "| grep", plate_id, "| grep ", well_id)
-            # find  /home/nyscf/Desktop/MMR_Runs/MMR0001 | grep MMR0001 | grep PS_103 | grep  A6
-            # for img in $(find . | grep _PS_105 | grep _C9_); do xdg-open $img; done
-            
-             
-            
-"""
