@@ -3,6 +3,7 @@ from keras import applications, callbacks
 from keras.models import Model
 from keras.layers import GlobalAveragePooling2D, Dropout, Dense
 from keras.utils import to_categorical
+from keras.metrics import categorical_accuracy
 from sklearn.model_selection import train_test_split
 import logging, sys
 import random
@@ -28,9 +29,9 @@ elif model_type == "resnet":
 # create a data generator
 datagen = ImageDataGenerator(rescale=1./255)
 
-train_it = datagen.flow_from_directory('/home/nyscf/Desktop/Classification_Model/data/train/', target_size=(300,300), class_mode='binary', batch_size=32)
+train_it = datagen.flow_from_directory('/home/nyscf/Desktop/Classification_Model/data/train/', target_size=(300,300), class_mode='categorical', batch_size=32)
 
-val_it = datagen.flow_from_directory('/home/nyscf/Desktop/Classification_Model/data/validation/', target_size=(300,300), class_mode='binary', batch_size=32)
+val_it = datagen.flow_from_directory('/home/nyscf/Desktop/Classification_Model/data/validation/', target_size=(300,300), class_mode='categorical', batch_size=32)
 
 batchX, batchy = train_it.next()
 print('Batch shape=%s, min=%.3f, max=%.3f' % (batchX.shape, batchX.min(), batchX.max()))
@@ -50,7 +51,7 @@ predictions = Dense(2, activation = 'softmax')(x)
 # predictions = to_categorical(predictions)
 model = Model(inputs = base_model.input, outputs = predictions)
 
-model.compile(loss = "sparse_categorical_crossentropy", optimizer = "adam", metrics = ["accuracy"])
+model.compile(loss = "categorical_crossentropy", optimizer = "adam", metrics = [categorical_accuracy])
 
 model.fit_generator(train_it, steps_per_epoch=16, epochs=10, validation_data=val_it, validation_steps=8)
 
