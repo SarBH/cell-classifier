@@ -18,12 +18,12 @@ train_data_dir = '/home/nyscf/Desktop/Classification_Model/data/train/'
 validation_data_dir = '/home/nyscf/Desktop/Classification_Model/data/validation/'
 # test_data_dir = '../../../Desktop/Classification_Model/data/test/'
 # NUMBER OF EXAMPLES
-num_train_samples = 2277
-num_validation_samples=197
+num_train_samples = 4135
+num_validation_samples=264
 
 lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1), cooldown=0, patience=3, min_lr=0.5e-6, verbose=1)
 early_stopper = EarlyStopping(min_delta=0.001, patience=20, verbose=1)
-csv_logger = CSVLogger('/home/nyscf/Documents/sarita/cell-classifier/resnet50_1hs_simpleAugmentation.csv')
+csv_logger = CSVLogger('/home/nyscf/Documents/sarita/cell-classifier/inception_1hs_simpleAugmentation.csv')
 
 
 
@@ -31,23 +31,32 @@ def train_model():
     """ Trains a CNN model and saves callbacks into model_path"""
   
     # SET THESE PARAMETERS. 
-    m = 2000 #str(len(x_train[0]))
+    m = 4135 #str(len(x_train[0]))
     mb_size = 10
     num_classes = 2
-    num_epochs = 3
+    num_epochs = 100
     img_size = (300,300)
-    dropout_rate = 0.3
-    model_type = "resnet"
+    dropout_rate = 0.4
+    model_type = "inception"
     # YOUR EDITS END HERE. DO NOT TOUCH ANYTHING BELOW
 
 
     # create a data generator
     datagen = ImageDataGenerator(rescale=1./255)
 
-    train_datagen = datagen.flow_from_directory(train_data_dir, target_size=img_size, 
+    if model_type == "inception":
+        train_datagen = datagen.flow_from_directory(train_data_dir, target_size=img_size, 
+                                                class_mode='categorical', batch_size=mb_size)
+        valid_datagen = datagen.flow_from_directory(validation_data_dir, target_size=img_size, 
+                                                class_mode='categorical', batch_size=mb_size)
+
+    elif model_type == "resnet":
+        train_datagen = datagen.flow_from_directory(train_data_dir, target_size=img_size, 
                                                 class_mode='binary', batch_size=mb_size)
-    valid_datagen = datagen.flow_from_directory(validation_data_dir, target_size=img_size, 
+        valid_datagen = datagen.flow_from_directory(validation_data_dir, target_size=img_size, 
                                                 class_mode='binary', batch_size=mb_size)
+    
+    
     batchX, batchy = train_datagen.next()
     print('Batch shape=%s, min=%.3f, max=%.3f' % (batchX.shape, batchX.min(), batchX.max()))
 
@@ -63,13 +72,15 @@ def train_model():
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
     x = Dropout(dropout_rate)(x)
-    predictions = Dense(1, activation = 'sigmoid')(x)
+    predictions = Dense(2, activation = 'softmax')(x)
     model = Model(inputs = base_model.input, outputs = predictions)
 
     opt = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)    
 
     model.compile(loss = "binary_crossentropy", optimizer = opt, metrics = ["accuracy"])
     
+    model_path = "/home/nyscf/Documents/sarita/cell-classifier/inception/chkpt_model.{epoch:02d}-acc{val_acc:.2f}.hdf5"#  _{model_type}_mb{mb_size}_m{m}_do{dropout_rate}   .format(model_type=model_type, mb_size=mb_size, m=m, dropout_rate=dropout_rate)
+    checkpoint = ModelCheckpoint(model_path, monitor='val_loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
 
     history = model.fit_generator(train_datagen, 
                                 steps_per_epoch=num_train_samples // mb_size, 
@@ -78,7 +89,7 @@ def train_model():
                                 validation_steps=8, 
                                 shuffle=True,
                                 verbose=1,
-                                callbacks=[lr_reducer, early_stopper, csv_logger])
+                                callbacks=[lr_reducer, early_stopper, csv_logger, checkpoint])
     
     # model.save("/home/nyscf/Documents/sarita/cell-classifier/model_resnet_mb10_m3500_e22_do2.h5")
     model.save("/home/nyscf/Documents/sarita/cell-classifier/model_{model_type}_mb{mb_size}_m{m}_e{num_epochs}_do{dropout_rate}.h5".format(model_type=model_type, mb_size=mb_size, m=m, num_epochs=num_epochs, dropout_rate=dropout_rate))
@@ -127,9 +138,6 @@ def plot_results(history):
     plt.show()
 
 
-
-   
 if __name__ == "__main__":
     history = train_model()
     plot_results(history)
-
