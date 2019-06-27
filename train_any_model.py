@@ -4,8 +4,10 @@ from keras.callbacks import ReduceLROnPlateau, CSVLogger, EarlyStopping, ModelCh
 from keras.models import Model, Sequential
 from keras.layers import GlobalAveragePooling2D, Dropout, Dense, Activation, Conv2D, MaxPooling2D, Flatten
 from keras.utils import np_utils
+from sklearn.metrics import confusion_matrix, classification_report
+import itertools
+import matplotlib.pyplot as plt
 
-from matplotlib import pyplot as plt
 
 import numpy as np
 import logging, sys
@@ -14,8 +16,8 @@ import sys
 
 
 # Add your path folders for training, validation and test images. 
-train_data_dir = '/home/nyscf/Desktop/Classification_Model/data/train/'
-validation_data_dir = '/home/nyscf/Desktop/Classification_Model/data/validation/'
+train_data_dir = '/home/nyscf/Desktop/Classification_Model/data/train_3_classes/'
+validation_data_dir = '/home/nyscf/Desktop/Classification_Model/data/validation_3_classes/'
 # test_data_dir = '../../../Desktop/Classification_Model/data/test/'
 
 # NUMBER OF EXAMPLES - manual edit
@@ -23,9 +25,9 @@ num_train_samples = 4135
 num_validation_samples=264
 
 lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1), cooldown=0, patience=3, min_lr=0.5e-6, verbose=1)
-early_stopper = EarlyStopping(min_delta=0.001, patience=20, verbose=1)
+early_stopper = EarlyStopping(min_delta=0.001, patience=12, verbose=1)
 # SET NAME OF CSV
-csv_logger = CSVLogger('/home/nyscf/Documents/sarita/cell-classifier/resnet_with_preprocessing.csv')
+csv_logger = CSVLogger('/home/nyscf/Documents/sarita/cell-classifier/inception_3_classes_v1.csv')
 
 
 
@@ -35,16 +37,16 @@ def train_model():
     # SET THESE PARAMETERS. 
     m = 4135 #str(len(x_train[0]))
     mb_size = 10
-    num_classes = 2
+    num_classes = 3
     num_epochs = 100
     img_size = (224,224)
     dropout_rate = 0.4
-    model_type = "resnet"
+    model_type = "inception"
     # EDITS END HERE. DO NOT TOUCH ANYTHING BELOW
 
     # create the data generator. Different models require different preprocessing and generating
     if model_type == "inception":
-        datagen = ImageDataGenerator(rescale=1./255)
+        datagen = ImageDataGenerator(preprocessing_function=applications.inception_v3.preprocess_input)
         train_datagen = datagen.flow_from_directory(train_data_dir, target_size=img_size, 
                                                 class_mode='categorical', batch_size=mb_size)
         valid_datagen = datagen.flow_from_directory(validation_data_dir, target_size=img_size, 
@@ -120,8 +122,8 @@ def train_model():
     if model_type == "inception":
         x = base_model.output
         x = GlobalAveragePooling2D()(x)
-        x = Dropout(dropout_rate)(x)
-        predictions = Dense(2, activation = 'softmax')(x)
+        # x = Dropout(dropout_rate)(x)
+        predictions = Dense(num_classes, activation = 'softmax')(x)
     
     elif model_type == "resnet":
         x = base_model.output
@@ -151,7 +153,7 @@ def train_model():
                                 callbacks=[lr_reducer, early_stopper, csv_logger, checkpoint])
     
     # model.save("/home/nyscf/Documents/sarita/cell-classifier/model_resnet_mb10_m3500_e22_do2.h5")
-    model.save("/home/nyscf/Documents/sarita/cell-classifier/model_{model_type}_mb{mb_size}_m{m}_e{num_epochs}_do{dropout_rate}.h5".format(model_type=model_type, mb_size=mb_size, m=m, num_epochs=num_epochs, dropout_rate=dropout_rate))
+    model.save("/home/nyscf/Documents/sarita/cell-classifier/model_{model_type}_mb{mb_size}_m{m}_e{num_epochs}_c{num_classes}.h5".format(model_type=model_type, mb_size=mb_size, m=m, num_epochs=num_epochs, num_classes=num_classes))
 
 
     return history
@@ -197,6 +199,8 @@ def plot_results(history):
     plt.show()
 
 
+
 if __name__ == "__main__":
     history = train_model()
     plot_results(history)
+
