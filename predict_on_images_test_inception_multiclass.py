@@ -25,14 +25,13 @@ def extract_attributes(image_name):
 
 
 
-checkpoint_path = "/home/nyscf/Documents/sarita/models/inception_3_class/inception/chkpt_model.32-acc0.93.hdf5"
-model_path = ""
-images_path = "/home/nyscf/Desktop/Training_Subsets_by_well/MMR0014_Colonies/fifth200"
+checkpoint_path = "/home/nyscf/Documents/sarita/models/inception_3_class/inception/model_2/chkpt_model.19-acc0.95.hdf5"
+model_path = "/home/nyscf/Documents/sarita/models/inception_3_class/inception/model_inception_mb10_m5289_e50_c3.h5"
+images_path = "/home/nyscf/Desktop/Training_Subsets_by_well/MMR0014_Colonies"
 
-img_size = (300,300)
-# num_examples_to_load = 22
-valid_batch_size = 1
+img_size = (400,400)
 num_classes = 3
+WRITE_ON = False
 
 
 # FROM CHECKPOINT:
@@ -81,32 +80,35 @@ for i in os.listdir(images_path):
 
 
         if class_predicted == 0:
-            c = "dead "+str(np.around(prediction[0][0], decimals=2))
-            color = (255, 0, 0)
-            cv2.putText(out, c, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
+            if WRITE_ON:
+                c = "dead "+str(np.around(prediction[0][0], decimals=2))
+                color = (255, 0, 0)
+                cv2.putText(out, c, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
             cv2.imwrite(images_path + "/dead/" + i , out)
             class_predicted = 'dead'
             certainty = str(np.around(prediction[0][0], decimals=2))
         
         elif class_predicted == 1:
-            c = "diff "+str(np.around(prediction[0][1], decimals=2))
-            color = (255, 0, 0)
-            cv2.putText(out, c, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
+            if WRITE_ON:
+                c = "diff "+str(np.around(prediction[0][1], decimals=2))
+                color = (255, 0, 0)
+                cv2.putText(out, c, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
             cv2.imwrite(images_path + "/diff/" + i , out)
             class_predicted = 'diff'
             certainty = str(np.around(prediction[0][1], decimals=2))
 
         else:
-            color = (0, 255, 0)
-            c = "good "+str(np.around(prediction[0][2], decimals=2))
-            cv2.putText(out, c, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
+            if WRITE_ON:
+                color = (0, 255, 0)
+                c = "good "+str(np.around(prediction[0][2], decimals=2))
+                cv2.putText(out, c, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
             cv2.imwrite(images_path + "/good/" + i, out)
             class_predicted = 'good'
             certainty = str(np.around(prediction[0][2], decimals=2))
 
         row_in_csv = [counter, run_id, plate_id, well_id, date_taken, class_predicted, certainty]
 
-        with open(images_path + "/predictions.csv", 'a') as csvFile:
+        with open(images_path + "/model_2_predictions.csv", 'a') as csvFile:
             writer = csv.writer(csvFile)
             writer.writerow(row_in_csv)
 
