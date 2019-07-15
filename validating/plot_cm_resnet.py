@@ -55,12 +55,12 @@ if __name__ == "__main__":
 						Prints the predicted label
 	"""
 
-	model_path = "/home/nyscf/Documents/sarita/models/resnet/2019-07-11/chkpt_model.32-acc0.95.hdf5"
-	validation_data_dir = "/home/nyscf/Desktop/Classification_Model/data/validation_from_datagen/batch2"
+	model_path = "/home/nyscf/Documents/sarita/models/resnet_builder/2019-07-12/chkpt_model.53-acc0.94.hdf5"
+	validation_data_dir = "/home/nyscf/Desktop/Classification_Model/data/validation_from_datagen/batch3"
 	img_size = (400,400)
 	num_examples_to_load = 892
 	valid_batch_size = 1
-	num_classes = 2
+	num_classes = 3
 
 	validation_datagen = ImageDataGenerator(rescale=1./255)
 	validation_generator = validation_datagen.flow_from_directory(validation_data_dir,
@@ -83,7 +83,7 @@ if __name__ == "__main__":
 	# predictions = Dense(num_classes, activation = 'softmax')(x)
 	# model = Model(inputs=base_model.input, outputs=base_model.output)
 
-	model = load_model("/home/nyscf/Documents/sarita/models/resnet_builder/2019-07-12/chkpt_model.11-acc0.91.hdf5")
+	model = load_model(model_path)
 	# model = Sequential()
 	# model.add(prev_model)
 	# # model.add(Dense(256, activation = 'relu'))
@@ -128,6 +128,8 @@ if __name__ == "__main__":
 	# Plot non-normalized confusion matrix
 	plot_confusion_matrix(cm, classes=target_names,
 						title='Confusion matrix, without normalization')
+	plot_confusion_matrix(cm, classes=target_names, 
+						normalize=True, title="Normalized Confusion matrix")
 
 	plt.show()
 		
