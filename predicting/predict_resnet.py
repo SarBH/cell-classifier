@@ -32,13 +32,14 @@ def extract_attributes(image_name):
 
 
 if __name__ == "__main__":
-    model_path = "/home/nyscf/Documents/sarita/models/resnet_builder/2019-07-15/chkpt_model.27-acc0.95.hdf5"
-    images_path = "/home/nyscf/Desktop/Classification_Model/data/test data"
+    model_path = "/home/nyscf/Documents/sarita/models/resnet_builder/2019-07-15/chkpt_model.24-acc0.95.hdf5"
+    images_path = "/home/nyscf/Desktop/Training_Subets/EDRD0006_WPS_104_105_106_107_108_7-12-2019"
     img_size = (400,400)
-    num_images_to_load = 233
+    num_images_to_load = 149
     test_batch_size = 1
     num_classes = 4
-    WRITE_ON = True
+    WRITE_ON = False
+    UNCERTAIN_SEP = 0.7
 
     test_datagen = ImageDataGenerator(rescale=1./255)
     test_generator = test_datagen.flow_from_directory(images_path,
@@ -78,8 +79,8 @@ if __name__ == "__main__":
             print("the class predicted is:", class_predicted)
 
             # If the probability for the most probable class is below a treshold, algorithm is uncertain and requires intervention
-            if prediction[0][class_predicted] < 0.7 and class_predicted is not 0:
-                cv2.imwrite(images_path + "/2019-07-15 model.27 predictions on EDRD0006/uncertain/" + i, out)
+            if UNCERTAIN_SEP != None and prediction[0][class_predicted] < UNCERTAIN_SEP:
+                cv2.imwrite(images_path + "/" + model_path.split("/")[-1] + "/" + "uncertain" + "/" + i , out)
                 continue
 
             if WRITE_ON:
@@ -87,13 +88,13 @@ if __name__ == "__main__":
                 color = (255, 0, 0)
                 cv2.putText(out, c, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
             
-            cv2.imwrite(images_path + "/2019-07-15 model.27 predictions on EDRD0006/" + target_names[class_predicted] + "/" + i , out)
+            cv2.imwrite(images_path + "/" + model_path.split("/")[-1] + "/" + target_names[class_predicted] + "/" + i , out)
             certainty = str(np.around(prediction[0][class_predicted], decimals=2))
             
 
             row_in_csv = [counter, run_id, plate_id, well_id, date_taken, target_names[class_predicted], certainty, prediction[0][0], prediction[0][1], prediction[0][2], prediction[0][3]]
 
-            with open(images_path + "/2019-07-15 model.27 predictions on EDRD0006/" + model_path.split("_")[-1] + "__predictions.csv", 'a') as csvFile:
+            with open(images_path + "/" + model_path.split("/")[-1] + "/" + "__predictions.csv", 'a') as csvFile:
                 writer = csv.writer(csvFile)
                 writer.writerow(row_in_csv)
 
