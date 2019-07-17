@@ -33,7 +33,7 @@ def extract_attributes(image_name):
 
 if __name__ == "__main__":
     model_path = "/home/nyscf/Documents/sarita/models/resnet_builder/2019-07-15/chkpt_model.24-acc0.95.hdf5"
-    images_path = "/home/nyscf/Desktop/Training_Subets/EDRD0006_WPS_104_105_106_107_108_7-12-2019"
+    images_path = "/home/nyscf/Desktop/Training_Subets/MMR0028_copy_102_104_106_7-15-2019"
     img_size = (400,400)
     num_images_to_load = 149
     test_batch_size = 1
@@ -80,18 +80,23 @@ if __name__ == "__main__":
 
             # If the probability for the most probable class is below a treshold, algorithm is uncertain and requires intervention
             if UNCERTAIN_SEP != None and prediction[0][class_predicted] < UNCERTAIN_SEP:
-                cv2.imwrite(images_path + "/" + model_path.split("/")[-1] + "/" + "uncertain" + "/" + i , out)
-                continue
-
-            if WRITE_ON:
-                c = target_names[class_predicted] + " " + str(np.around(prediction[0][class_predicted], decimals=2))
-                color = (255, 0, 0)
-                cv2.putText(out, c, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
+                uncertain_dir = images_path + "/" + model_path.split("/")[-1] + "/" + "uncertain"
+                if not os.path.exists(uncertain_dir):
+                    os.makedirs(uncertain_dir)
+                cv2.imwrite(uncertain_dir + "/" + i , out)
+                
+            else:
+                if WRITE_ON:
+                    c = target_names[class_predicted] + " " + str(np.around(prediction[0][class_predicted], decimals=2))
+                    color = (255, 0, 0)
+                    cv2.putText(out, c, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
+                
+                m_dir = images_path + "/" + model_path.split("/")[-1] + "/" + target_names[class_predicted]
+                if not os.path.exists(m_dir):
+                    os.makedirs(m_dir)
+                cv2.imwrite(m_dir + "/" + i , out)
             
-            cv2.imwrite(images_path + "/" + model_path.split("/")[-1] + "/" + target_names[class_predicted] + "/" + i , out)
             certainty = str(np.around(prediction[0][class_predicted], decimals=2))
-            
-
             row_in_csv = [counter, run_id, plate_id, well_id, date_taken, target_names[class_predicted], certainty, prediction[0][0], prediction[0][1], prediction[0][2], prediction[0][3]]
 
             with open(images_path + "/" + model_path.split("/")[-1] + "/" + "__predictions.csv", 'a') as csvFile:
