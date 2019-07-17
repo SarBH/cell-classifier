@@ -38,7 +38,7 @@ pld_model_path = '/home/nyscf/Documents/sarita/cell-classifier/preprocessing/bro
 
 pld_model = models.load_model(pld_model_path, backbone_name='resnet50')
 
-imagelist = [i.strip() for i in open("/home/nyscf/Documents/sarita/cell-classifier/preprocessing/brodie/MMR0028_copy_102_104_106_7-14-2019_file_names_v1.txt")]
+imagelist = [i.strip() for i in open("/home/nyscf/Documents/sarita/cell-classifier/preprocessing/brodie/MMR0028_copy_102_104_106_7-15-2019_file_names_v1.txt")]
 
 
 c = 0
@@ -69,16 +69,15 @@ for i in imagelist:
         if label == 0:
             d2 = draw.copy()
             d2 = d2[y1:y2, x1:x2]
-            cv2.imwrite("/home/nyscf/Desktop/Training_Subets/MMR0028_copy_102_104_106_7-14-2019/" + file_name.split(".")[0] + str(x1) + "--" +
+            cv2.imwrite("/home/nyscf/Desktop/Training_Subets/MMR0028_copy_102_104_106_7-15-2019/" + file_name.split(".")[0] + str(x1) + "--" +
                         str(y1) + "--" + str(x2) + "--" + str(y2) + ".jpg", d2)
         elif label == 2:
             d2 = draw.copy()
             d2 = d2[y1:y2, x1:x2]
-            cv2.imwrite("/home/nyscf/Desktop/Training_Subets/MMR0028_copy_102_104_106_7-14-2019/" + file_name.split(".")[0] + str(x1) + "--" +
+            cv2.imwrite("/home/nyscf/Desktop/Training_Subets/MMR0028_copy_102_104_106_7-15-2019/" + file_name.split(".")[0] + str(x1) + "--" +
                         str(y1) + "--" + str(x2) + "--" + str(y2) + ".jpg", d2)
-
         elif label == 1:
             d2 = draw.copy()
             d2 = d2[y1:y2, x1:x2]
-            cv2.imwrite("/home/nyscf/Desktop/Training_Subets/MMR0028_copy_102_104_106_7-14-2019/" + file_name.split(".")[0] + str(x1) + "--" +
+            cv2.imwrite("/home/nyscf/Desktop/Training_Subets/MMR0028_copy_102_104_106_7-15-2019/" + file_name.split(".")[0] + str(x1) + "--" +
                         str(y1) + "--" + str(x2) + "--" + str(y2) + ".jpg", d2)
